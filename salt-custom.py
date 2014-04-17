@@ -7,6 +7,6 @@ def get_block_device():
     for i in dev:
         if i not in os.listdir('/dev'):
             raise CommandExecutionError(
-                'Invalid device found'
+                'Invalid device ' + i + ' found'
             )
     return out
