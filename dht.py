@@ -5,11 +5,9 @@ from grove_rgb_lcd import *
 
 dht_sensor_port = 7
 dht_sensor_type = 0
-distance_threshold = 20
 ultrasonic_ranger = 4
 
-#setRGB(0,128,64)
-#setRGB(0,255,0)
+distance_threshold = 20
 
 try:
     (temp, hum) = dht(dht_sensor_port, dht_sensor_type)
