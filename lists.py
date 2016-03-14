@@ -2,7 +2,7 @@
 
 '''
 Generates automatically two arrays, a and b.
-Return an arrays containing common elements in arrays
+Returns an arrays containing common elements in arrays
 a and b.
 '''
 
