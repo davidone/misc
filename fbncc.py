@@ -27,3 +27,5 @@ if __name__ == "__main__":
         print "{:s} is not valid.".format(number)
         exit(1)
     fbncc(number)
+
+exit(0)
