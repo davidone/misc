@@ -3,10 +3,13 @@
 import subprocess
 import os
 import http.client, urllib
+import time
+from datetime import datetime
 
+NODE_BIN = "/usr/local/bin/node"
 PO_API_TOKEN = ""
 PO_USER_KEY = ""
-NODE_BIN = "/usr/local/bin/node"
+SLEEP_TIME = 120
 
 
 class cd:
@@ -58,6 +61,9 @@ def process_tesco(t_list) -> str:
     no_slots_count = t_list.count('No slots')
     if no_slots_count == 3:
       return ""
+    else:
+      print(t_list)
+      exit(1)
 
 
 def send_po(message) -> bool:
@@ -81,6 +87,11 @@ def send_po(message) -> bool:
 
 if __name__ == "__main__":
     define_po_keys()
-    res_tesco = check_tesco()
-    message = process_tesco(res_tesco)
-    send_po(message)
+    while True:
+      now = datetime.now()
+      print(f"Running at: {now.strftime('%Y/%m/%d %H:%M:%S')}")
+      res_tesco = check_tesco()
+      message = process_tesco(res_tesco)
+      send_po(message)
+      print(f"Sleeping for {SLEEP_TIME} seconds...")
+      time.sleep(SLEEP_TIME)
