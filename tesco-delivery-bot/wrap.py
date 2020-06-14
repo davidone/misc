@@ -1,3 +1,5 @@
+import subprocess
+import os
 import http.client, urllib
 
 PO_API_TOKEN = ""
@@ -14,6 +16,20 @@ class cd:
 
     def __exit__(self, etype, value, traceback):
         os.chdir(self.savedPath)
+
+
+def define_po_keys() -> None:
+  global PO_API_TOKEN, PO_USER_KEY
+  try:
+    PO_API_TOKEN = os.environ["PO_API_TOKEN"]
+    PO_USER_KEY = os.environ["PO_USER_KEY"]
+  except KeyError as err:
+    print(f"Error: {err}. Check if your environment defines PO_API_TOKEN and PO_USER_KEY")
+    exit(1)
+  if not PO_API_TOKEN or not PO_USER_KEY:
+    print(f"Error: PushOver token or key are empty.")
+    exit(1)
+
 
 def check_tesco() -> list:
   with cd("/path/delivery-slot-bot"):
@@ -32,7 +48,7 @@ def process_tesco(t_list) -> str:
 
 def send_po(message) -> bool:
   if not message:
-    print("message is emtpy")
+    print("Message is emtpy")
     return True
   conn = http.client.HTTPSConnection("api.pushover.net:443")
   conn.request("POST", "/1/messages.json",
