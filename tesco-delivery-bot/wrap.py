@@ -51,16 +51,17 @@ def check_tesco() -> list:
         return []
 
     result_list = result.stdout.split("\n")
-    print(result_list)
+    return result_list
 
 
 def process_tesco(t_list) -> str:
-    return "ok world"
+    no_slots_count = t_list.count('No slots')
+    if no_slots_count == 3:
+      return ""
 
 
 def send_po(message) -> bool:
     if not message:
-        print("message is emtpy")
         return True
 
     conn = http.client.HTTPSConnection("api.pushover.net:443")
