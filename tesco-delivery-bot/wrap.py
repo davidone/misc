@@ -4,7 +4,8 @@ import argparse
 import subprocess
 import os
 import re
-import http.client, urllib
+import http.client
+import urllib
 import time
 from datetime import datetime
 
@@ -36,7 +37,8 @@ def define_po_keys():
         PO_USER_KEY = os.environ["PO_USER_KEY"]
     except KeyError as err:
         print(
-            f"Error: {err}. Check if your environment defines PO_API_TOKEN and PO_USER_KEY"
+            f"Error: {err}."
+            "Check if your environment defines PO_API_TOKEN and PO_USER_KEY"
         )
         exit(1)
     if not PO_API_TOKEN or not PO_USER_KEY:
@@ -94,7 +96,7 @@ def send_po(message) -> bool:
         "POST",
         "/1/messages.json",
         urllib.parse.urlencode(
-            {"token": PO_API_TOKEN, "user": PO_USER_KEY, "message": message,}
+            {"token": PO_API_TOKEN, "user": PO_USER_KEY, "message": message}
         ),
         {"Content-type": "application/x-www-form-urlencoded"},
     )
@@ -105,10 +107,11 @@ def send_po(message) -> bool:
 
 
 def main_argparse() -> list:
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--days', dest='days', type=str, nargs='+', required=True)
-  args = parser.parse_args()
-  return args.days
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--days", dest="days", type=str, nargs="+",
+                        required=True)
+    args = parser.parse_args()
+    return args.days
 
 
 if __name__ == "__main__":
@@ -120,9 +123,6 @@ if __name__ == "__main__":
         print(f"Running at: {now.strftime('%Y/%m/%d %H:%M:%S')}")
         res_tesco = check_tesco()
         message = process_tesco(res_tesco, days_list)
-        if message:
-            send_po(message)
-        else:
-            print(f"No slots yet...")
+        send_po(message) if message else print(f"No slots yet...")
         print(f"Sleeping for {SLEEP_TIME} seconds...")
         time.sleep(SLEEP_TIME)
