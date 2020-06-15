@@ -1,7 +1,9 @@
 #!/usr/local/bin/python3.7
 
+import argparse
 import subprocess
 import os
+import re
 import http.client, urllib
 import time
 from datetime import datetime
@@ -9,7 +11,8 @@ from datetime import datetime
 NODE_BIN = "/usr/local/bin/node"
 PO_API_TOKEN = ""
 PO_USER_KEY = ""
-SLEEP_TIME = 120
+SLEEP_TIME = 60
+PTTRN = re.compile(r"start: (?P<start>[^,]+), end: (?P<end>[^ ]+)")
 
 
 class cd:
@@ -57,19 +60,35 @@ def check_tesco() -> list:
     return result_list
 
 
-def process_tesco(t_list) -> str:
-    no_slots_count = t_list.count('No slots')
+def process_tesco(t_list, days_list) -> str:
+    return_str = ""
+    no_slots_count = t_list.count("No slots")
     if no_slots_count == 3:
-      return ""
-    else:
-      print(t_list)
-      exit(1)
+        return return_str
+
+    ret_set = set()
+    for elem in t_list:
+        print(f"elem is: {elem}")
+        re_group = PTTRN.search(elem)
+        if re_group is None:
+            continue
+        re_start = re_group.group("start")
+        re_end = re_group.group("end")
+        if re_start[:10] != re_end[:10]:
+            print(f"Something is fishy here: start {re_start} != end {re_end}")
+        if re_start[:10] in days_list:
+            ret_set.add(f"{re_start} - {re_end}")
+
+    if len(ret_set):
+        return_str = " || ".join(ret_set)
+    return return_str
 
 
 def send_po(message) -> bool:
     if not message:
         return True
 
+    print(f"Sending: {message}")
     conn = http.client.HTTPSConnection("api.pushover.net:443")
     conn.request(
         "POST",
@@ -85,13 +104,25 @@ def send_po(message) -> bool:
     return True
 
 
+def main_argparse() -> list:
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--days', dest='days', type=str, nargs='+', required=True)
+  args = parser.parse_args()
+  return args.days
+
+
 if __name__ == "__main__":
+    days_list = main_argparse()
+    print(f"Searching for slots in: {' - '.join(days_list)}")
     define_po_keys()
     while True:
-      now = datetime.now()
-      print(f"Running at: {now.strftime('%Y/%m/%d %H:%M:%S')}")
-      res_tesco = check_tesco()
-      message = process_tesco(res_tesco)
-      send_po(message)
-      print(f"Sleeping for {SLEEP_TIME} seconds...")
-      time.sleep(SLEEP_TIME)
+        now = datetime.now()
+        print(f"Running at: {now.strftime('%Y/%m/%d %H:%M:%S')}")
+        res_tesco = check_tesco()
+        message = process_tesco(res_tesco, days_list)
+        if message:
+            send_po(message)
+        else:
+            print(f"No slots yet...")
+        print(f"Sleeping for {SLEEP_TIME} seconds...")
+        time.sleep(SLEEP_TIME)
