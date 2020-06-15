@@ -1,4 +1,7 @@
 #!/usr/local/bin/python3.7
+"""
+This is based on the output of https://github.com/paulmaunders/delivery-slot-bot/
+"""
 
 import argparse
 import subprocess
