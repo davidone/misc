@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3.7
 """
-This is based on the output of https://github.com/paulmaunders/delivery-slot-bot/
+This is to be used with https://github.com/paulmaunders/delivery-slot-bot/
 """
 
 import argparse
@@ -49,8 +49,8 @@ def define_po_keys():
         exit(1)
 
 
-def check_tesco() -> list:
-    with cd("~/delivery-slot-bot"):
+def check_tesco(dtb_path) -> list:
+    with cd(dtb_path):
         result = subprocess.run(
             [NODE_BIN, "delivery-slots.js"],
             stdout=subprocess.PIPE,
@@ -111,20 +111,20 @@ def send_po(message) -> bool:
 
 def main_argparse() -> list:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--days", dest="days", type=str, nargs="+",
-                        required=True)
+    parser.add_argument("--days", dest="days", type=str, nargs="+", required=True)
+    parser.add_argument("--dtb-path", dest="dtb_path", type=str, required=True)
     args = parser.parse_args()
-    return args.days
+    return (args.days, args.dtb_path)
 
 
 if __name__ == "__main__":
-    days_list = main_argparse()
+    (days_list, dtb_path) = main_argparse()
     print(f"Searching for slots in: {' - '.join(days_list)}")
     define_po_keys()
     while True:
         now = datetime.now()
         print(f"Running at: {now.strftime('%Y/%m/%d %H:%M:%S')}")
-        res_tesco = check_tesco()
+        res_tesco = check_tesco(dtb_path)
         message = process_tesco(res_tesco, days_list)
         send_po(message) if message else print(f"No slots yet...")
         print(f"Sleeping for {SLEEP_TIME} seconds...")
