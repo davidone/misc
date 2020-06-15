@@ -73,7 +73,6 @@ def process_tesco(t_list, days_list) -> str:
 
     ret_set = set()
     for elem in t_list:
-        print(f"elem is: {elem}")
         re_group = PTTRN.search(elem)
         if re_group is None:
             continue
