@@ -22,6 +22,7 @@ export PO_API_TOKEN="bar"
 
 ./wrap.py --days 2020-07-02 2020-07-03 2020-07-04
 ```
+so it's _docker friendly_, let's say :)
 
 # Known issues
 In https://github.com/davidone/misc/blob/master/tesco-delivery-bot/wrap.py#L53 there is coded the path where https://github.com/paulmaunders/delivery-slot-bot is installed, please modify accordingly.
