@@ -15,7 +15,7 @@ from datetime import datetime
 NODE_BIN = "/usr/local/bin/node"
 PO_API_TOKEN = ""
 PO_USER_KEY = ""
-SLEEP_TIME = 60
+SLEEP_TIME = 120
 PTTRN = re.compile(r"start: (?P<start>[^,]+), end: (?P<end>[^ ]+)")
 
 
@@ -44,9 +44,6 @@ def define_po_keys():
             "Check if your environment defines PO_API_TOKEN and PO_USER_KEY"
         )
         exit(1)
-    if not PO_API_TOKEN or not PO_USER_KEY:
-        print(f"Error: PushOver token or key are empty.")
-        exit(1)
 
 
 def check_tesco(dtb_path) -> list:
@@ -58,7 +55,7 @@ def check_tesco(dtb_path) -> list:
             text=True,
         )
     if result.stderr:
-        print(f"ERROR: {result.stderr}")
+        print(f"ERROR, unfortunately.")
         return []
 
     result_list = result.stdout.split("\n")
@@ -67,10 +64,13 @@ def check_tesco(dtb_path) -> list:
 
 def process_tesco(t_list, days_list) -> str:
     return_str = ""
+    if len(t_list) == 0:
+        return return_str
     no_slots_count = t_list.count("No slots")
     if no_slots_count == 3:
         return return_str
 
+    print(f"Slots found, let me check if they may suit your needs.")
     ret_set = set()
     for elem in t_list:
         re_group = PTTRN.search(elem)
@@ -103,6 +103,7 @@ def send_po(message) -> bool:
         {"Content-type": "application/x-www-form-urlencoded"},
     )
     res = conn.getresponse()
+    print(res.status)
     if res.status not in range(200, 300):
         return False
     return True
@@ -116,7 +117,7 @@ def main_argparse() -> list:
     return (args.days, args.dtb_path)
 
 
-if __name__ == "__main__":
+def main() -> None:
     (days_list, dtb_path) = main_argparse()
     print(f"Searching for slots in: {' - '.join(days_list)}")
     define_po_keys()
@@ -128,3 +129,7 @@ if __name__ == "__main__":
         send_po(message) if message else print(f"No slots yet...")
         print(f"Sleeping for {SLEEP_TIME} seconds...")
         time.sleep(SLEEP_TIME)
+
+
+if __name__ == "__main__":
+    main()
