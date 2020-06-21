@@ -103,7 +103,6 @@ def send_po(message) -> bool:
         {"Content-type": "application/x-www-form-urlencoded"},
     )
     res = conn.getresponse()
-    print(res.status)
     if res.status not in range(200, 300):
         return False
     return True
