@@ -1,17 +1,51 @@
 from datetime import datetime
 import time
 import sys
+import re
+import click
 
-fmt = '%Y-%m-%d %H:%M:%S'
-dt_from = sys.argv[1]
-dt_to = sys.argv[2]
-d1 = datetime.strptime(dt_from, fmt)
-d2 = datetime.strptime(dt_to, fmt)
 
-# Convert to Unix timestamp
-d1_ts = time.mktime(d1.timetuple())
-d2_ts = time.mktime(d2.timetuple())
+def validate_date(ctx, param, value):
+    if isinstance(value, tuple):
+        return value
 
-minutesDiff = int(d2_ts-d1_ts) / 60
+    p = re.compile("^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$")
+    if p.match(value) is None:
+        raise click.BadParameter("format must be '%Y-%m-%d %H:%M:%S'")
+    return value
 
-print(minutesDiff)
+
+def dateDiff(since, until) -> int:
+    fmt = "%Y-%m-%d %H:%M:%S"
+    d1 = datetime.strptime(since, fmt)
+    d2 = datetime.strptime(until, fmt)
+
+    # Convert to Unix timestamp
+    d1_ts = time.mktime(d1.timetuple())
+    d2_ts = time.mktime(d2.timetuple())
+    minutesDiff = int((d2_ts - d1_ts) / 60)
+    return minutesDiff
+
+
+@click.command()
+@click.option(
+    "--since",
+    type=click.UNPROCESSED,
+    required=True,
+    callback=validate_date,
+    help="Start date",
+)
+@click.option(
+    "--until",
+    type=click.UNPROCESSED,
+    required=True,
+    callback=validate_date,
+    help="End date",
+)
+def main(since, until):
+    minDiff = dateDiff(since, until)
+    print(f"Minutes between {since} and {until}: {minDiff}m")
+
+
+if __name__ == "__main__":
+    main()
